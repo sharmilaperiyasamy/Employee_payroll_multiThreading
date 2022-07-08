@@ -17,33 +17,48 @@ namespace Employee_MultiThreading
         {
             foreach (Employee_Profile emp_Profile in emp)
             {
-                this.createRecord(emp_Profile);
+                this.createNewRecord(emp_Profile);
                 Console.WriteLine("Employee Added: " + emp_Profile.name);
             }
         }
-        public void createRecord(Employee_Profile profile)
+
+        public void addNewEmployeeWithMultiThreading(List<Employee_Profile> employee)
+        {
+            foreach (Employee_Profile employee_Profile in employee)
+            {
+                Task thread = new Task(() =>
+                {
+                    this.createNewRecord(employee_Profile);
+                    Console.WriteLine("Person added : " + employee_Profile.name);
+                });
+            }
+        }
+        public void createNewRecord(Employee_Profile profile)
         {
             SqlConnection connection = new SqlConnection(connectionString);
-            using (connection)
+            lock (this)
             {
-                connection.Open();
-                SqlCommand command = new SqlCommand("SpAddEmployeeDetails", connection);
-                command.CommandType = CommandType.StoredProcedure;
-                command.Parameters.AddWithValue("@name", profile.name);
-                command.Parameters.AddWithValue("@salary", profile.salary);
-                command.Parameters.AddWithValue("@startdate", profile.startdate);
-                command.Parameters.AddWithValue("@gender", profile.gender);
-                command.Parameters.AddWithValue("@phone_no", profile.phone_no);
-                command.Parameters.AddWithValue("@department", profile.department);
-                command.Parameters.AddWithValue("@address", profile.address);
-                command.Parameters.AddWithValue("@basic_pay", profile.basic_pay);
-                command.Parameters.AddWithValue("@deductions", profile.deductions);
-                command.Parameters.AddWithValue("@taxable_pay", profile.taxable_pay);
-                command.Parameters.AddWithValue("@income_tax", profile.income_tax);
-                command.Parameters.AddWithValue("@net_pay", profile.net_pay);
-                command.ExecuteNonQuery();
-                Console.WriteLine("Records are created successfully.");
-                connection.Close();
+                using (connection)
+                {
+                    connection.Open();
+                    SqlCommand command = new SqlCommand("SpAddEmployeeDetails", connection);
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@name", profile.name);
+                    command.Parameters.AddWithValue("@salary", profile.salary);
+                    command.Parameters.AddWithValue("@startdate", profile.startdate);
+                    command.Parameters.AddWithValue("@gender", profile.gender);
+                    command.Parameters.AddWithValue("@phone_no", profile.phone_no);
+                    command.Parameters.AddWithValue("@department", profile.department);
+                    command.Parameters.AddWithValue("@address", profile.address);
+                    command.Parameters.AddWithValue("@basic_pay", profile.basic_pay);
+                    command.Parameters.AddWithValue("@deductions", profile.deductions);
+                    command.Parameters.AddWithValue("@taxable_pay", profile.taxable_pay);
+                    command.Parameters.AddWithValue("@income_tax", profile.income_tax);
+                    command.Parameters.AddWithValue("@net_pay", profile.net_pay);
+                    command.ExecuteNonQuery();
+                    Console.WriteLine("Records are created successfully.");
+                    connection.Close();
+                }
             }
         }
     }
